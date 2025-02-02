@@ -43,7 +43,7 @@ struct InvoicesView: View {
                 
                 Spacer()
                 
-                Text(invoice.subjectMatters?.reduce(Decimal(0.0), { $0 + Decimal($1.price) }) ?? Decimal(0.0), format: .currency(code: "USD"))
+                Text(invoice.subjectMatters?.reduce(Decimal(0.0), { $0 + Decimal($1.price) }) ?? Decimal(0.0), format: .currency(code: invoice.currency.rawValue))
                     .font(.title2)
                     .padding()
                 
