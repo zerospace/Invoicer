@@ -102,9 +102,14 @@ struct CustomerView: View {
                         }, set: { customer.represented?.name = $0 }))
                         .frame(minWidth: 500.0, idealWidth: 500.0)
                         
-                        TextField("Info", text: Binding(get: {
-                            return customer.represented?.info ?? ""
-                        }, set: { customer.represented?.info = $0 }))
+                        TextField("Note in English", text: Binding(get: {
+                            return customer.represented?.noteEng ?? ""
+                        }, set: { customer.represented?.noteEng = $0 }))
+                        .frame(minWidth: 500.0, idealWidth: 500.0)
+                        
+                        TextField("Note in Ukrainian", text: Binding(get: {
+                            return customer.represented?.noteUkr ?? ""
+                        }, set: { customer.represented?.noteUkr = $0 }))
                         .frame(minWidth: 500.0, idealWidth: 500.0)
                     }
                 }
@@ -157,9 +162,14 @@ struct CustomerView: View {
                         }, set: { customer.payer?.represented?.name = $0 }))
                         .frame(minWidth: 500.0, idealWidth: 500.0)
                         
-                        TextField("Info", text: Binding(get: {
-                            return customer.payer?.represented?.info ?? ""
-                        }, set: { customer.payer?.represented?.info = $0 }))
+                        TextField("Note in English", text: Binding(get: {
+                            return customer.payer?.represented?.noteEng ?? ""
+                        }, set: { customer.payer?.represented?.noteEng = $0 }))
+                        .frame(minWidth: 500.0, idealWidth: 500.0)
+                        
+                        TextField("Note in Ukrainian", text: Binding(get: {
+                            return customer.payer?.represented?.noteUkr ?? ""
+                        }, set: { customer.payer?.represented?.noteUkr = $0 }))
                         .frame(minWidth: 500.0, idealWidth: 500.0)
                     }
                 }

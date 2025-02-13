@@ -20,6 +20,16 @@ final class Profile {
     var city: String?
     var taxNumber: String?
     
+    var address: String {
+        var parts = [String]()
+        if let zip = zip { parts.append(zip) }
+        if let region = region { parts.append(region) }
+        if let district = district { parts.append(district) }
+        if let city = city { parts.append(city) }
+        if let address = addressLine { parts.append(address) }
+        return parts.joined(separator: ", ")
+    }
+    
     init() {
         self.lastName = nil
         self.firstName = nil

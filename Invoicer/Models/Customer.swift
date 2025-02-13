@@ -10,7 +10,8 @@ import SwiftData
 
 struct Represented: Codable {
     var name: String?
-    var info: String?
+    var noteEng: String?
+    var noteUkr: String?
 }
 
 @Model

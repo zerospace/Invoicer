@@ -13,12 +13,12 @@ final class Subject {
     private(set) var id = UUID()
     var ukrName: String?
     var engName: String?
-    @Relationship(deleteRule: .cascade, inverse: \InvoiceSubjectMatter.subject) var invoiceSubject: [InvoiceSubjectMatter]? = [InvoiceSubjectMatter]()
+    
+    @Relationship var invoice: Invoice?
     
     init() {
         id = UUID()
         ukrName = nil
         engName = nil
-        invoiceSubject = [InvoiceSubjectMatter]()
     }
 }

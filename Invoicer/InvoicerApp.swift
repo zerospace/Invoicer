@@ -18,7 +18,6 @@ struct InvoicerApp: App {
             Customer.self,
             Payer.self,
             Subject.self,
-            InvoiceSubjectMatter.self,
             Invoice.self
         ])
         let modelConfiguration = ModelConfiguration(schema: schema, isStoredInMemoryOnly: false)

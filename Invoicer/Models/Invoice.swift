@@ -10,22 +10,6 @@ import SwiftData
 
 enum Currency: String, Codable, CaseIterable {
     case usd, eur, uah
-    
-    var ukrName: String {
-        switch self {
-        case .usd: "доларів США"
-        case .eur: "євро"
-        case .uah: "грн"
-        }
-    }
-    
-    var engName: String {
-        switch self {
-        case .usd: "United States dollars"
-        case .eur: "euros"
-        case .uah: "hryvnias"
-        }
-    }
 }
 
 @Model
@@ -36,7 +20,10 @@ final class Invoice {
     var startDate = Date.now
     var endDate = Date.now
     var currency = Currency.usd
-    @Relationship(deleteRule: .cascade, inverse: \InvoiceSubjectMatter.invoice) var subjectMatters: [InvoiceSubjectMatter]? = [InvoiceSubjectMatter]()
+    @Relationship(deleteRule: .nullify, inverse: \Subject.invoice) var subjectMatter: Subject?
+    var quantity: Int = 1
+    var price: Double = 0.0
+    
     @Relationship var customer: Customer?
     
     init(number: Int, place: String?) {
@@ -46,6 +33,8 @@ final class Invoice {
         self.startDate = .now
         self.endDate = Calendar.current.date(byAdding: .day, value: 7, to: startDate) ?? .now
         self.currency = .usd
-        self.subjectMatters = [InvoiceSubjectMatter]()
+        self.subjectMatter = nil
+        self.quantity = 1
+        self.price = 0.0
     }
 }

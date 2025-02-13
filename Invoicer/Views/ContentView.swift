@@ -80,7 +80,7 @@ struct ContentView: View {
         } detail: {
             Group {
                 if let customer = selected {
-                    InvoicesView(customer: customer)
+                    InvoicesView(customer: customer, profile: profile)
                 }
                 else {
                     Text("Select a customer")

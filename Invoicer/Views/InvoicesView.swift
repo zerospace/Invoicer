@@ -7,11 +7,13 @@
 
 import SwiftUI
 import SwiftData
+import PDFKit
 
 struct InvoicesView: View {
     @Environment(\.modelContext) private var modelContext
     
     private let customer: Customer
+    private let profile: Profile?
     private let invoices: [Invoice]
     private let numberFormatter: NumberFormatter
     
@@ -20,8 +22,11 @@ struct InvoicesView: View {
     @State private var toDelete: Invoice? = nil
     @State private var confirmDeletion: Bool = false
     
-    init(customer: Customer) {
+    @State private var pdf: Data? = nil
+    
+    init(customer: Customer, profile: Profile?) {
         self.customer = customer
+        self.profile = profile
         self.invoices = customer.invoices?.sorted(by: { $0.number < $1.number }) ?? []
         
         self.numberFormatter = NumberFormatter()
@@ -43,7 +48,7 @@ struct InvoicesView: View {
                 
                 Spacer()
                 
-                Text(invoice.subjectMatters?.reduce(Decimal(0.0), { $0 + Decimal($1.price) }) ?? Decimal(0.0), format: .currency(code: invoice.currency.rawValue))
+                Text(Decimal(Double(invoice.quantity) * invoice.price), format: .currency(code: invoice.currency.rawValue))
                     .font(.title2)
                     .padding()
                 
@@ -52,8 +57,21 @@ struct InvoicesView: View {
                         toDelete = invoice
                         confirmDeletion.toggle()
                     }
-                    Button("Save as PDF", systemImage: "document.fill") {
-                        
+                    
+                    if let profile = profile {
+                        Button("Export to PDF", systemImage: "document.fill") {
+                            pdf = PDFCreator().generate(invoice: invoice, customer: customer, profile: profile)
+                            let panel = NSSavePanel()
+                            panel.allowedContentTypes = [.pdf]
+                            panel.canCreateDirectories = true
+                            panel.isExtensionHidden = false
+                            panel.title = "Save Invoice #\(invoice.number) as PDF"
+                            panel.nameFieldLabel = "PDF file name:"
+                            let response = panel.runModal()
+                            if response == .OK, let url = panel.url {
+                                try? pdf?.write(to: url)
+                            }
+                        }
                     }
                 }
                 .menuStyle(.button)
@@ -106,29 +124,14 @@ struct InvoicesView: View {
                                 Text(item.rawValue.uppercased())
                             }
                         }
-                        Button("Add Subject Matter") {
-                            let subject = InvoiceSubjectMatter(invoice: toEdit)
-                            toEdit?.subjectMatters?.append(subject)
-                            modelContext.insert(subject)
-                        }
-                    }
-                    
-                    if let subjectMatters = toEdit?.subjectMatters {
-                        ForEach(subjectMatters) { subjectMatter in
-                            Section {
-                                Picker("Subject", selection: Binding(get: { subjectMatter.subject }, set: { subjectMatter.subject = $0 })) {
-                                    ForEach(subjects) { item in
-                                        Text(item.engName ?? "Unknown")
-                                            .tag(item)
-                                    }
-                                }
-                                TextField("Quantity", value: Binding(get: { subjectMatter.quantity }, set: { subjectMatter.quantity = $0 }), format: .number)
-                                TextField("Price", value: Binding(get: { subjectMatter.price }, set: { subjectMatter.price = $0 }), formatter: numberFormatter)
-                                Button("Delete") {
-                                    modelContext.delete(subjectMatter)
-                                }
+                        Picker("Subject Matter", selection: Binding(get: { toEdit?.subjectMatter }, set: { toEdit?.subjectMatter = $0 })) {
+                            ForEach(subjects) { item in
+                                Text(item.engName ?? "Unknown")
+                                    .tag(item)
                             }
                         }
+                        TextField("Quantity", value: Binding(get: { toEdit?.quantity ?? 1 }, set: { toEdit?.quantity = $0 }), format: .number)
+                        TextField("Price", value: Binding(get: { toEdit?.price ?? 0.0 }, set: { toEdit?.price = $0 }), formatter: numberFormatter)
                     }
                 }
                 
@@ -136,6 +139,17 @@ struct InvoicesView: View {
                     toEdit = nil
                 }
                 .padding()
+            }
+        }
+        .inspector(isPresented: Binding(get: { pdf != nil }, set: { if !$0 { pdf = nil } })) {
+            if let doc = pdf {
+                PDFKitView(data: doc)
+                Button("Close") {
+                    pdf = nil
+                }
+            }
+            else {
+                EmptyView()
             }
         }
     }
