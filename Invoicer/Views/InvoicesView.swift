@@ -61,16 +61,6 @@ struct InvoicesView: View {
                     if let profile = profile {
                         Button("Export to PDF", systemImage: "document.fill") {
                             pdf = PDFCreator().generate(invoice: invoice, customer: customer, profile: profile)
-                            let panel = NSSavePanel()
-                            panel.allowedContentTypes = [.pdf]
-                            panel.canCreateDirectories = true
-                            panel.isExtensionHidden = false
-                            panel.title = "Save Invoice #\(invoice.number) as PDF"
-                            panel.nameFieldLabel = "PDF file name:"
-                            let response = panel.runModal()
-                            if response == .OK, let url = panel.url {
-                                try? pdf?.write(to: url)
-                            }
                         }
                     }
                 }
@@ -144,9 +134,26 @@ struct InvoicesView: View {
         .inspector(isPresented: Binding(get: { pdf != nil }, set: { if !$0 { pdf = nil } })) {
             if let doc = pdf {
                 PDFKitView(data: doc)
-                Button("Close") {
-                    pdf = nil
+                HStack {
+                    Button("Save") {
+                        let panel = NSSavePanel()
+                        panel.allowedContentTypes = [.pdf]
+                        panel.canCreateDirectories = true
+                        panel.isExtensionHidden = false
+                        panel.title = "Save Invoice as PDF"
+                        panel.nameFieldLabel = "PDF file name:"
+                        let response = panel.runModal()
+                        if response == .OK, let url = panel.url {
+                            try? pdf?.write(to: url)
+                            pdf = nil
+                        }
+                    }
+                    
+                    Button("Close") {
+                        pdf = nil
+                    }
                 }
+                .padding()
             }
             else {
                 EmptyView()

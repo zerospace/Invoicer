@@ -92,10 +92,10 @@ final class PDFCreator {
                 supplierUkr.append(NSAttributedString(string: "ФОП ", attributes: regularAttributes))
             }
             if let lastName = profile.lastName, let firstName = profile.firstName, let patronymic = profile.patronymic {
-                supplierEng.append(NSAttributedString(string: lastName + " " + firstName + "\n", attributes: regularAttributes))
+                supplierEng.append(NSAttributedString(string: lastName.transliterate + " " + firstName.transliterate + "\n", attributes: regularAttributes))
                 supplierUkr.append(NSAttributedString(string: lastName + " " + firstName + " " + patronymic + "\n", attributes: regularAttributes))
             }
-            supplierEng.append(NSAttributedString(string: "address: " + profile.address, attributes: regularAttributes))
+            supplierEng.append(NSAttributedString(string: "address: " + profile.address.transliterate, attributes: regularAttributes))
             supplierUkr.append(NSAttributedString(string: "що проживає за адресою " + profile.address, attributes: regularAttributes))
             if let taxNumber = profile.taxNumber {
                 supplierEng.append(NSAttributedString(string: "\nIndividual Tax Number - " + taxNumber, attributes: regularAttributes))
@@ -459,7 +459,7 @@ final class PDFCreator {
             
             let sign = NSMutableAttributedString(string: "Supplier/Виконавець:\t______________________________________\t", attributes: regularAttributes)
             if let lastName = profile.lastName, let firstName = profile.firstName, let patronymic = profile.patronymic {
-                sign.append(NSAttributedString(string: "(\(lastName) \(firstName) / \(lastName) \(firstName.first ?? Character("")). \(patronymic.first ?? Character("")).)", attributes: regularAttributes))
+                sign.append(NSAttributedString(string: "(\(lastName.transliterate) \(firstName.transliterate) / \(lastName) \(firstName.first ?? Character("")). \(patronymic.first ?? Character("")).)", attributes: regularAttributes))
             }
             sign.draw(at: CGPoint(x: insets.left, y: innerRect.height - sign.size().height))
             
