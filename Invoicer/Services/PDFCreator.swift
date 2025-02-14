@@ -10,6 +10,8 @@ import PDFKit
 
 final class PDFCreator {
     private let dateFormatter = DateFormatter()
+    private let englishNumberFormatter = NumberFormatter()
+    private let ukrainianNumberFormatter = NumberFormatter()
     private let pageRect = CGRect(x: 0, y: 0, width: 595.2, height: 841.8) // A4, 72 dpi
     
     func generate(invoice: Invoice, customer: Customer, profile: Profile) -> Data {
@@ -24,6 +26,12 @@ final class PDFCreator {
         let currencyString = invoice.currency.rawValue.uppercased()
         
         dateFormatter.dateFormat = "dd.MM.yyyy"
+        
+        englishNumberFormatter.numberStyle = .spellOut
+        englishNumberFormatter.locale = Locale(identifier: "en_US")
+        
+        ukrainianNumberFormatter.numberStyle = .spellOut
+        ukrainianNumberFormatter.locale = Locale(identifier: "uk_UA")
         
         let cfMutableData = CFDataCreateMutable(kCFAllocatorDefault, 0)!
         var mediaBox = pageRect
@@ -353,7 +361,17 @@ final class PDFCreator {
             let totalToPay = NSAttributedString(string: "Total to pay /\nУсього до сплати:", attributes: regularAttributes)
             totalToPay.draw(at: CGPoint(x: xOffset, y: pageYOffset))
             xOffset += totalToPay.size().width + (tableOffset * 2)
-            let totalInWords = NSAttributedString(string: "Total in words\nУсього словами", attributes: regularAttributes)
+            
+            let fraction = Int((total * 100).rounded()) % 100
+            var engTotalInWords = englishNumberFormatter.string(from: NSNumber(value: Int(total)))?.capitalized ?? "Zero"
+            engTotalInWords += " " + invoice.currency.englishNameInWords
+            engTotalInWords += " " + (englishNumberFormatter.string(from: NSNumber(value: fraction)) ?? "zero") + " " + invoice.currency.englishFraction
+            
+            var ukrTotalInWords = ukrainianNumberFormatter.string(from: NSNumber(value: Int(total)))?.capitalized ?? "Нуль"
+            ukrTotalInWords += " " + invoice.currency.ukrainianNameInWords
+            ukrTotalInWords += " " + (ukrainianNumberFormatter.string(from: NSNumber(value: fraction)) ?? "нуль") + " " + invoice.currency.ukrainianFraction
+            
+            let totalInWords = NSAttributedString(string: engTotalInWords + "\n" + ukrTotalInWords, attributes: regularAttributes)
             let totalInWordsTextRect = CGRect(x: xOffset, y: pageYOffset, width: innerRect.width - xOffset - (innerRect.width - fourthRowX), height: .greatestFiniteMagnitude)
             let totalInWordsBounds = totalInWords.boundingRect(with: totalInWordsTextRect.size, options: [.usesFontLeading, .usesLineFragmentOrigin])
             let totalInWordsRect = CGRect(origin: totalInWordsTextRect.origin, size: totalInWordsBounds.size)

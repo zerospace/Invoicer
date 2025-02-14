@@ -8,10 +8,6 @@
 import AppKit
 import SwiftData
 
-enum Currency: String, Codable, CaseIterable {
-    case usd, eur, uah
-}
-
 @Model
 final class Invoice {
     private(set) var id = UUID()
