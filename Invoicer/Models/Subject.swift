@@ -14,7 +14,7 @@ final class Subject {
     var ukrName: String?
     var engName: String?
     
-    @Relationship var invoice: Invoice?
+    @Relationship var invoices: [Invoice]?
     
     init() {
         id = UUID()

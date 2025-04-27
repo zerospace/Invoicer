@@ -16,7 +16,7 @@ final class Invoice {
     var startDate = Date.now
     var endDate = Date.now
     var currency = Currency.usd
-    @Relationship(deleteRule: .nullify, inverse: \Subject.invoice) var subjectMatter: Subject?
+    @Relationship(deleteRule: .nullify, inverse: \Subject.invoices) var subjectMatter: Subject?
     var quantity: Int = 1
     var price: Double = 0.0
     

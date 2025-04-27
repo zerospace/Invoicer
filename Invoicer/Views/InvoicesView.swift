@@ -23,6 +23,7 @@ struct InvoicesView: View {
     @State private var confirmDeletion: Bool = false
     
     @State private var pdf: Data? = nil
+    @State private var invoiceName: String? = nil
     
     init(customer: Customer, profile: Profile?) {
         self.customer = customer
@@ -60,6 +61,7 @@ struct InvoicesView: View {
                     
                     if let profile = profile {
                         Button("Export to PDF", systemImage: "document.fill") {
+                            invoiceName = "Invoice#\(invoice.number)"
                             pdf = PDFCreator().generate(invoice: invoice, customer: customer, profile: profile)
                         }
                     }
@@ -107,7 +109,13 @@ struct InvoicesView: View {
                     Section {
                         TextField("Number", value: Binding(get: { toEdit?.number ?? 0 }, set: { toEdit?.number = $0 }), format: .number)
                         TextField("Place", text: Binding(get: { toEdit?.place ?? "" }, set: { toEdit?.place = $0 }))
-                        DatePicker("Start Date", selection: Binding(get: { toEdit?.startDate ?? .now }, set: { toEdit?.startDate = $0 }), displayedComponents: [.date])
+                        DatePicker("Start Date", selection: Binding(
+                            get: { toEdit?.startDate ?? .now },
+                            set: { date in
+                                toEdit?.startDate = date
+                                toEdit?.endDate = Calendar.current.date(byAdding: .day, value: 7, to: date) ?? .now
+                            }
+                        ), displayedComponents: [.date])
                         DatePicker("End Date", selection: Binding(get: { toEdit?.endDate ?? .now }, set: { toEdit?.endDate = $0 }), displayedComponents: [.date])
                         Picker("Currency", selection: Binding(get: { toEdit?.currency ?? .usd }, set: { toEdit?.currency = $0 })) {
                             ForEach(Currency.allCases, id: \.self) { item in
@@ -142,6 +150,9 @@ struct InvoicesView: View {
                         panel.isExtensionHidden = false
                         panel.title = "Save Invoice as PDF"
                         panel.nameFieldLabel = "PDF file name:"
+                        if let name = invoiceName {
+                            panel.nameFieldStringValue = name
+                        }
                         let response = panel.runModal()
                         if response == .OK, let url = panel.url {
                             try? pdf?.write(to: url)
